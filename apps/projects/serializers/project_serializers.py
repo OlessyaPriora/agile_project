@@ -31,3 +31,10 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'count_of_files')
 
 
+class ProjectShortInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ('id', 'name')
+
+
+
