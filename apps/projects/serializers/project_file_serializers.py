@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from apps.projects.models import ProjectFile
+from apps.projects.serializers.project_serializers import *
 from apps.projects.utils.upload_file_helpers import (
     check_extension,
     create_file_path,
@@ -57,3 +58,11 @@ class CreateProjectFileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "File size is too large (2 MB as maximum)."
             )
+
+
+class ProjectFileDetailSerializer(serializers.ModelSerializer):
+    project = ProjectShortInfoSerializer(many=True)
+
+    class Meta:
+        model = ProjectFile
+        exclude = ('file_path',)

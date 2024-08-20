@@ -2,9 +2,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import get_object_or_404, ListCreateAPIView
+from rest_framework.generics import get_object_or_404, ListCreateAPIView, RetrieveDestroyAPIView
 from apps.projects.models import ProjectFile, Project
 from apps.projects.serializers.project_file_serializers import *
+from apps.projects.utils.upload_file_helpers import delete_file
 
 
 class ProjectFileListGenericView(ListCreateAPIView):
@@ -39,6 +40,48 @@ class ProjectFileListGenericView(ListCreateAPIView):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+#########################################################
+
+
+class ProjectFileDetailGenericView(RetrieveDestroyAPIView):
+    serializer_class = ProjectFileDetailSerializer
+
+    def get_object(self):
+        return get_object_or_404(ProjectFile, pk=self.kwargs['pk'])
+
+    def retrieve(self, request: Request, *args, **kwargs) -> Response:
+        file = self.get_object()
+
+        serializer = self.get_serializer(file)
+
+        return Response(
+            data=serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def destroy(self, request: Request, *args, **kwargs) -> Response:
+        file = self.get_object()
+
+        try:
+            delete_file(file_path=file.file_path.path)
+
+        except Exception as e:
+            return Response(
+                data={"message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            file.delete()
+
+        return Response(
+            data={
+                "message": "File deleted successfully"
+            },
+            status=status.HTTP_200_OK
+        )
+
+##########################################################
 
 # class ProjectFileListAPIView(APIView):
 #     def get_objects(self, project_name=None):
@@ -100,5 +143,5 @@ class ProjectFileListGenericView(ListCreateAPIView):
 #             status=status.HTTP_400_BAD_REQUEST
 #         )
 
-
+#################################################################
 
